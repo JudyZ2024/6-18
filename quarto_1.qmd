@@ -1,0 +1,48 @@
+---
+title: "6-18"
+format: html
+---
+
+
+```{r}
+#| echo: false
+#| message: false
+library(tidyverse)
+library(leaflet)
+library(tidycensus)
+library(sf)
+```
+
+```{r}
+#| echo: false
+#| message: false
+la_bachelors <- get_acs(
+  geography = "tract",
+  variables = c(bachelors = "B15003_022", total = "B15003_001"),
+  state = "CA",
+  county = "Los Angeles County",
+  year = 2021,
+  survey = "acs5",
+  geometry = TRUE
+) %>%
+  group_by(GEOID) %>%
+  summarize(
+    bachelors = sum(estimate[variable == "bachelors"]),
+    total = sum(estimate[variable == "total"]),
+    percentage_bachelors = (bachelors / total) * 100
+  )
+
+la_bachelors
+```
+
+```{r}
+#| echo: false
+#| message: false
+ggplot(la_bachelors, aes(x = percentage_bachelors)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+  labs(title = "Percentage of Bachelor's Degree Holders in Los Angeles County Tracts",
+       x = "Percentage of Bachelor's Degree Holders",
+       y = "Count") +
+  theme_minimal()
+```
+
